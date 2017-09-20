@@ -301,6 +301,7 @@ namespace R3Booster
                 {
                     //System.Diagnostics.Process.Start("CMD.exe", "/K del /q /f /s %temp%");
                     limparTemp();
+                    cbTemp.Checked = false;
                 }
                 if (cbDesocultar.Checked)
                 {
@@ -455,7 +456,8 @@ namespace R3Booster
 
             String comando = "compact /c /s " + pasta + "\\ && pause && exit";
             System.Diagnostics.Process.Start("cmd.exe", "/C " + comando + " && pause && exit");
-            MessageBox.Show(comando);
+            //MessageBox.Show(comando);
+            cbCompact.Checked = false;
         }
 
 
@@ -521,7 +523,10 @@ namespace R3Booster
         // Função para pegar IP e MAC
         public void IP_MAC()
         {
-            String comando = "arp -a 192.168.0.1 && pause && exit";
+            //String comando = "arp -a 192.168.0.1 && pause && exit";
+            //String comando = "arp -a 192.168.102.44 && pause && exit";
+            MessageBox.Show("Ver Adaptadores de Rede Sem Fio ou Adaptadores de Ethernet\nEndereço IPv4", "Instruçoes", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            String comando = "ipconfig && pause && cls && getmac && pause && exit";
             System.Diagnostics.Process.Start("cmd.exe", "/C " + comando);
         }
 
@@ -557,6 +562,7 @@ namespace R3Booster
                 if (cbIpMac.Checked)
                 {
                     IP_MAC();
+                    cbIpMac.Checked = false;
                 }
 
                 if (cbPing.Checked)
@@ -570,6 +576,7 @@ namespace R3Booster
                     {
                         ping(txtAddress.Text);
                         txtAddress.Text = "";
+                        cbPing.Checked = false;
                     }
 
                 }
