@@ -12,6 +12,8 @@ namespace R3Booster
         public Form1()
         {
             InitializeComponent();
+            CreateContextMenu();
+            
         }
 
         //
@@ -20,6 +22,8 @@ namespace R3Booster
 
         // Quando o Formulário é carregado
 
+        // Criando um processo global, que será configurado e acionado posteriormente
+        Process RAMClearprocess;
         private void Form1_Load(object sender, EventArgs e)
         {
             // Configurando o recurso de visualizar a RAM usada/total do computador
@@ -29,7 +33,14 @@ namespace R3Booster
 
             // Configurando o intervalo do Timer para limpeza da RAM
             timerLimparRAM.Interval = (int)(nUDMinutos.Value) * 60000;
-        }
+
+            // Configurando o processo para limpar a RAM
+            RAMClearprocess = new Process();
+            RAMClearprocess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            RAMClearprocess.StartInfo.FileName = "cmd.exe";
+            string argument = "/C EmptyStandbyList.exe workingsets && exit";
+            RAMClearprocess.StartInfo.Arguments = argument;
+                    }
 
         // Quando o Form é minimizado para a bandeja do sistema, ou aberto
         private void Form1_Resize(object sender, EventArgs e)
@@ -379,7 +390,10 @@ namespace R3Booster
 
         public void limparRAM()
         {
-            System.Diagnostics.Process.Start("cmd.exe", "/K EmptyStandbyList.exe workingsets && exit");
+            RAMClearprocess.Start();
+
+            // Old Method
+            //System.Diagnostics.Process.Start("cmd.exe", "/c EmptyStandbyList.exe workingsets && exit");
         }
 
         //CheckBox para limpar a RAM a cada X minutos
@@ -407,15 +421,55 @@ namespace R3Booster
             timerLimparRAM.Interval = (int)(nUDMinutos.Value) * 60000;
         }
 
-
-        // Configurando a passagem do programa para a bandeja no sistema
-        private void notifyIcon1_Click(object sender, EventArgs e)
+        // Criando e configurando o menu do ícone, para quando o programa está na bandeja do sistema
+        private void CreateContextMenu()
         {
-            this.Show();
-            this.BringToFront();
-            this.WindowState = FormWindowState.Normal;
+            // Criando o menu em si
+            ContextMenuStrip menuStrip = new ContextMenuStrip();
+
+            // Criando os itens do menu
+            ToolStripMenuItem menuItem = new ToolStripMenuItem("Abrir o programa");
+            ToolStripMenuItem menuItem1 = new ToolStripMenuItem("Limpar a RAM");
+            ToolStripMenuItem menuItem2 = new ToolStripMenuItem("Fechar o programa");
+
+            // Configurando um nome aos itens
+            menuItem.Name = "Abrir";
+            menuItem1.Name = "Limpar";
+            menuItem2.Name = "Fechar";
+
+            // Adicionando o event "Click" aos itens
+            menuItem.Click += new EventHandler(menuItem_Click);
+            menuItem1.Click += new EventHandler(menuItem_Click);
+            menuItem2.Click += new EventHandler(menuItem_Click);
+
+            // Adicionando os itens ao menu
+            menuStrip.Items.Add(menuItem);
+            menuStrip.Items.Add(menuItem1);
+            menuStrip.Items.Add(menuItem2);
+
+            // Adicionando o menu ao ícone de notificação
+            notifyIcon1.ContextMenuStrip = menuStrip;
         }
 
+        // Método que executa uma ação conforme qual opção do menu foi selecionada
+        void menuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripItem menuItem = (ToolStripItem)sender;
+            if (menuItem.Name == "Sair")
+            {
+                Application.Exit();
+            }
+            else if (menuItem.Name == "Limpar")
+            {
+                limparRAM();
+            }
+            else if(menuItem.Name == "Abrir")
+            {
+                this.Show();
+                this.BringToFront();
+                this.WindowState = FormWindowState.Normal;
+            }
+        }
 
         // Verificação de arquivos do Disco
         private void execVerif()
@@ -581,6 +635,13 @@ namespace R3Booster
 
                 }
             }
+        }
+
+        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            this.Show();
+            this.BringToFront();
+            this.WindowState = FormWindowState.Normal;
         }
     }
 }
